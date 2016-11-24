@@ -12,13 +12,68 @@
     <script src="js/bootstrap/bootstrap.min.js"></script>
     <script src="js/socket.io.min.js"></script>
     <script src="js/main.js"></script>
+    <script>
+        $(document).ready(function () {
+            var socket = io();
+            socket.on('currencies', function (cur) {
+                console.log(cur);
+                createTable(cur);
+            })
+
+            function createTable(cur) {
+                var table = $('table.currencies');
+                table.empty();
+                $('<th/>').text("Currency").appendTo(table);
+                $('<th/>').text("We Buy").appendTo(table);
+                $('<th/>').text("We Sell").appendTo(table);
+                $.each(cur, function (i) {
+                    var tr = $('<tr/>')
+                        .appendTo(table);
+
+
+                    var td = $('<td/>')
+                        .text(cur[i].name)
+                        .appendTo(tr);
+
+                    var flag = $('<span/>')
+                        .addClass("flag flag-icon flag-icon-"+cur[i].flag)
+                        .prependTo(td);
+
+                    var buy_td = $('<td/>')
+                        .appendTo(tr);
+
+                    var sell_td = $('<td/>')
+                        .appendTo(tr);
+
+                    var buy = $('<input/>')
+                        .val(cur[i].buy)
+                        .addClass("cur-input")
+                        .on("focusout",function () {
+                            cur[i].buy = buy.val();
+                            socket.emit("change currency",cur);
+                        })
+                        .appendTo(buy_td);
+
+                    var sell = $('<input/>')
+                        .val(cur[i].sell)
+                        .addClass("cur-input")
+                        .on("focusout",function () {
+                            cur[i].buy = sell.val();
+                            socket.emit("change currency",cur);
+                        })
+                        .appendTo(sell_td);
+
+                })
+            }
+        });
+    </script>
 </head>
 
 <body>
 <div id="main">
-    <div class="top"> TOP </div>
+    <div class="top"> TOP</div>
     <div class="middle">
-        <table border="1" class="table">
+        <table border="1" class="table currencies">
             <tr>
                 <th>Currency</th>
                 <th>We Buy</th>
@@ -26,7 +81,7 @@
             </tr>
             <tr>
                 <td><span class="flag flag-icon flag-icon-gr"></span>RON</td>
-                <td>12</td>
+                <td><input class="cur-input"/></td>
                 <td>120</td>
             </tr>
         </table>
